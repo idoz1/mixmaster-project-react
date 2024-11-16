@@ -1,14 +1,28 @@
-import { Form } from 'react-router-dom'
+import axios from 'axios'
+import { Form, redirect, useNavigation } from 'react-router-dom'
+import { toast } from 'react-toastify'
+
+const newsletterUrl = 'https://www.course-api.com/cocktails-newsletter'
 
 export const action = async ({ request }) => {
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
-  console.log(data)
 
-  return null
+  try {
+    const response = await axios.post(newsletterUrl, data)
+
+    console.log(response)
+    toast.success(response.data.msg)
+    return redirect('/')
+  } catch (error) {
+    toast.error(error?.response?.data?.msg)
+    return error
+  }
 }
 
 const Newsletter = () => {
+  const navigation = useNavigation()
+  const isSubmitting = navigation.state === 'submitting'
   return (
     <Form className='form' method='POST'>
       <h4 style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -23,8 +37,7 @@ const Newsletter = () => {
           className='form-input'
           name='name'
           id='name'
-          // required
-          defaultValue='shake and bake'
+          required
         />
       </div>
       <div className='form-row'>
@@ -36,8 +49,7 @@ const Newsletter = () => {
           className='form-input'
           name='lastName'
           id='lastName'
-          // required
-          defaultValue='bananas'
+          required
         />
       </div>
       <div className='form-row'>
@@ -45,20 +57,21 @@ const Newsletter = () => {
           email
         </label>
         <input
-          type='text'
+          type='email'
           className='form-input'
           name='email'
           id='email'
-          // required
-          defaultValue='gobananas@gmial.com'
+          required
+          defaultValue='test@test.com'
         />
       </div>
       <button
         type='submit'
         className='btn btn-block'
         style={{ marginTop: '0.5rem' }}
+        disabled={isSubmitting}
       >
-        Submit
+        {isSubmitting ? 'submitting...' : 'submit'}
       </button>
     </Form>
   )
